@@ -12,8 +12,8 @@ Plataforma gamificada para preparar o IELTS em **7 dias**, com prática delibera
 |---|---|---|
 | 🗺️ Plano 7 dias | Missões diárias (diagnóstico → estratégias → T1 → T2 → velocidade → simulado → revisão) | Progresso por dia, bónus de XP |
 | 🎧 Listening | 8 secções originais (2 conjuntos Partes 1–4, 80 perguntas) com voz britânica gerada no browser | Resposta certa + porquê (citação do script) + dica; transcrição; banda estimada |
-| 📖 Reading | 6 textos académicos (78 perguntas): TFNG, YNNG, headings, matching, MCQ, completion | Igual + desempenho por tipo de pergunta + estratégias |
-| ✍️ Writing | 5 Task 1 Academic (gráficos), 2 cartas GT, 4 Task 2 | Análise automática (palavras, overview, posição, conectores, repetições, registo), resposta modelo banda 8+, autoavaliação pelos descritores, prompt para examinador AI |
+| 📖 Reading | 5 conjuntos General Training (Secções 1–2, 68 perguntas) + 6 textos longos (Secção 3 / Academic, 78 perguntas) | Igual + desempenho por tipo de pergunta + estratégias |
+| ✍️ Writing | 5 cartas GT (informal, semi-formal, formal), 5 Task 1 Academic, 4 Task 2 | Análise automática (palavras, overview, posição, conectores, repetições, registo), resposta modelo banda 8+, autoavaliação pelos descritores, prompt para examinador AI |
 | 🎙️ Speaking | 5 tópicos P1, 5 cartões P2, 5 discussões P3 | Gravação + transcrição, ritmo (palavras/min), fillers, variedade lexical, respostas modelo, autoavaliação, prompt AI |
 | 🔁 Revisão | Erros voltam por repetição espaçada (Leitner) + 100 flashcards | Erros "dominados" após 3 acertos espaçados |
 | 🏁 Simulado | Exame completo em condições reais | Banda global estimada |
