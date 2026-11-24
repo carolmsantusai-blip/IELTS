@@ -28,7 +28,7 @@ const codeOf = o => String(o).trim().split(/[\s.)]+/)[0];
 /* ================= State ================= */
 const KEY = "ieltsQuest.v1";
 const defaults = () => ({
-  name: "Carolina", xp: 0, startDate: todayStr(), examDate: "2026-12-01", module: "academic",
+  name: "Carolina", xp: 0, startDate: todayStr(), examDate: "2026-12-02", module: "general",
   theme: "auto", rate: 0.95, voiceF: "", voiceM: "",
   results: {}, missions: {}, activeDays: [], review: {}, vocab: {}, badges: {}, drafts: {}, guideRead: {},
   stats: { words: 0, recordings: 0, vocabReviews: 0, mastered: 0 }
@@ -113,7 +113,7 @@ function resolveMission(m) {
 }
 function subtitle(skill, it) {
   if (skill === "listening") return `Parte ${it.part} · Set ${it.set} · ${countQ(it)} perguntas`;
-  if (skill === "reading") return `${countQ(it)} perguntas · ${it.timeMinutes || 20} min · ${it.difficulty || ""}`;
+  if (skill === "reading") return `${it.module === "general" ? `GT Secção ${it.section} · ` : ""}${countQ(it)} perguntas · ${it.timeMinutes || 20} min · ${it.difficulty || ""}`;
   if (skill === "writing") return `Task ${it.task} · ${it.module === "general" ? "General Training" : "Academic"} · ${it.timeMinutes} min`;
   if (skill === "speaking") return `Parte ${it.part}${it.part === 2 ? " · cartão" : ` · ${(it.questions || []).length} perguntas`}`;
   return "";
@@ -125,9 +125,11 @@ function missionDone(day, idx) {
   const r = resolveMission(m);
   return !!(r.key && S.results[r.key] && ["reading", "listening", "writing", "speaking", "mock"].includes(m.type));
 }
+const visibleMission = m => !(m.gtOnly && S.module !== "general");
 function dayProgress(d) {
-  const done = d.missions.filter((_, i) => missionDone(d.day, i)).length;
-  return { done, total: d.missions.length, pct: Math.round(done / d.missions.length * 100) };
+  const idx = d.missions.map((m, i) => i).filter(i => visibleMission(d.missions[i]));
+  const done = idx.filter(i => missionDone(d.day, i)).length;
+  return { done, total: idx.length, pct: Math.round(done / idx.length * 100) };
 }
 function currentDay() { return Math.min(7, Math.max(1, daysBetween(S.startDate, todayStr()) + 1)); }
 let activeMission = null; // "d3-1" quando o utilizador entra por uma missão
@@ -212,7 +214,7 @@ const TTS = {
       u.onend = done; u.onerror = e => { if (e.error !== "interrupted" && e.error !== "canceled") done(); };
       onLine && onLine(q.i, lines.length); speechSynthesis.speak(u);
     };
-    speechSynthesis.cancel(); setTimeout(next, 120);
+    speechSynthesis.cancel(); next(); // síncrono: o iOS/Safari exige o 1.º speak() dentro do clique
     return { stop() { stopped = true; speechSynthesis.cancel(); }, pause() { speechSynthesis.pause(); }, resume() { speechSynthesis.resume(); } };
   },
   say(text, gender = "female") { const u = new SpeechSynthesisUtterance(text); const v = this.pick(gender); if (v) u.voice = v; u.lang = "en-GB"; u.rate = S.rate; speechSynthesis.cancel(); speechSynthesis.speak(u); }
@@ -363,6 +365,7 @@ routes.home = () => {
 };
 function missionsHTML(d) {
   return d.missions.map((m, i) => {
+    if (!visibleMission(m)) return "";
     const r = resolveMission(m), done = missionDone(d.day, i);
     const sep = r.href.includes("?") ? "&" : "?";
     return `<a class="mission skill-${m.type} ${done ? "done" : ""}" href="${r.href}${sep}m=d${d.day}-${i}">
@@ -382,7 +385,7 @@ routes.plan = (_, p) => {
   const draw = () => {
     $("#daymap", root).innerHTML = D.plan.map(d => { const dp = dayProgress(d); return `<button class="day ${d.day === currentDay() ? "today" : ""} ${d.day === sel ? "sel" : ""} ${dp.pct === 100 ? "complete" : ""}" data-d="${d.day}"><small>Dia ${d.day} · ${esc(addDays(S.startDate, d.day - 1).slice(5))}</small><b>${esc(d.title)}</b><div class="mini"><i style="width:${dp.pct}%"></i></div></button>`; }).join("");
     const d = D.plan[sel - 1], dp = dayProgress(d);
-    $("#dayDetail", root).innerHTML = `<div class="spread"><div><div class="eyebrow">Dia ${d.day} · ${dp.done}/${dp.total} missões · ~${d.missions.reduce((a, m) => a + m.min, 0)} min</div><h2>${esc(d.title)}</h2></div>${dp.pct === 100 ? '<span class="chip ok">✓ Concluído</span>' : ""}</div>
+    $("#dayDetail", root).innerHTML = `<div class="spread"><div><div class="eyebrow">Dia ${d.day} · ${dp.done}/${dp.total} missões · ~${d.missions.filter(visibleMission).reduce((a, m) => a + m.min, 0)} min</div><h2>${esc(d.title)}</h2></div>${dp.pct === 100 ? '<span class="chip ok">✓ Concluído</span>' : ""}</div>
       <p><b>Foco:</b> ${esc(d.focus)}</p><p class="muted">💼 ${esc(d.why)}</p>${missionsHTML(d)}`;
   };
   root.addEventListener("click", e => { const b = e.target.closest("[data-d]"); if (b) { sel = +b.dataset.d; draw(); } });
@@ -397,7 +400,11 @@ function listView(skill) {
   if (skill === "listening") groups = [["Set A — treino", items.filter(i => i.set === "A")], ["Set B — usado no simulado", items.filter(i => i.set !== "A")]];
   else if (skill === "writing") groups = [["Task 1 — Academic", items.filter(i => i.task === 1 && i.module !== "general")], ["Task 1 — General Training (cartas)", items.filter(i => i.task === 1 && i.module === "general")], ["Task 2 — Ensaio", items.filter(i => i.task === 2)]];
   else if (skill === "speaking") groups = [1, 2, 3].map(p => [`Parte ${p}`, items.filter(i => i.part === p)]);
-  else groups = [["Textos", items]];
+  else {
+    const gt = [["General Training — Secção 1 (textos curtos do dia a dia)", items.filter(i => i.module === "general" && i.section === 1)], ["General Training — Secção 2 (contexto de trabalho)", items.filter(i => i.module === "general" && i.section === 2)]];
+    const ac = [[S.module === "general" ? "Textos longos — treino da Secção 3 GT / Academic" : "Academic", items.filter(i => i.module !== "general")]];
+    groups = S.module === "general" ? gt.concat(ac) : ac.concat(gt);
+  }
   mount(`<div class="page-head skill-${skill}"><div class="spread"><div><h1>${s.em} ${s.name}</h1><p>${esc(s.desc)}</p></div>${ring(sb, skill)}</div></div>
     ${!items.length ? `<div class="card empty">Conteúdo ainda não carregado.</div>` : ""}
     ${groups.filter(g => g[1].length).map(([t, arr]) => `<h3 style="margin:18px 0 10px">${t}</h3>${arr.map((it, i) => {
@@ -425,8 +432,8 @@ function readingView(ids, opt = {}) {
     <div id="resultBox"></div><div class="split" id="split"></div>`);
   const drawPassage = () => {
     const it = items[cur];
-    $("#split", root).innerHTML = `<article class="card passage"><div class="eyebrow">Reading Passage ${cur + 1}</div><h2>${esc(it.title)}</h2>
-      ${it.paragraphs.map(p => `<div class="para"><b>${esc(p.label || "")}</b><p>${esc(p.text)}</p></div>`).join("")}</article>
+    $("#split", root).innerHTML = `<article class="card passage"><div class="eyebrow">${it.module === "general" ? `General Training · Secção ${it.section}` : `Reading Passage ${cur + 1}`}</div><h2>${esc(it.title)}</h2>
+      ${it.paragraphs.map(p => `<div class="para"><b>${esc(p.label || "")}</b><div>${p.heading ? `<h3 style="font-family:var(--font);margin:0 0 4px">${esc(p.heading)}</h3>` : ""}<p>${esc(p.text)}</p></div></div>`).join("")}</article>
       <section class="card">${groupsHTML(it, ans, graded)}${items.length > 1 && cur < items.length - 1 ? `<button class="btn" data-t="${cur + 1}">Texto seguinte →</button>` : ""}</section>`;
   };
   const updCount = () => { $("#answered", root).textContent = `${Object.values(ans).filter(v => v).length}/${total}`; };
@@ -562,7 +569,7 @@ const STOP = new Set("the a an and or but of to in on at for with by from is are
 function analyseText(text, task, module) {
   const words = wordsOf(text), wc = words.length;
   const paras = text.split(/\n\s*\n|\n/).map(p => p.trim()).filter(Boolean);
-  const sentences = text.split(/(?<=[.!?])\s+/).filter(s => wordsOf(s).length > 2);
+  const sentences = text.split(/[.!?]+\s+/).filter(s => wordsOf(s).length > 2);
   const low = " " + text.toLowerCase().replace(/\s+/g, " ") + " ";
   const linkers = LINKERS.filter(l => low.includes(" " + l + " ") || low.includes(" " + l + ",") || low.includes(" " + l + "."));
   const freq = {}; words.forEach(w => { const k = w.toLowerCase(); if (k.length > 3 && !STOP.has(k)) freq[k] = (freq[k] || 0) + 1; });
@@ -801,6 +808,7 @@ function speakingView(ids, opt = {}) {
           rec[idx].text = finalText.trim();
           const tr = $("#tr", root); if (tr && si === idx) tr.innerHTML = `${esc(finalText)}<span class="interim">${esc(interim)}</span>`;
         };
+        recog.onerror = e => { if (e.error === "not-allowed" || e.error === "service-not-allowed") { const tr = $("#tr", root); if (tr) tr.innerHTML = '<span class="interim">Transcrição bloqueada: no iPad ativa Definições → Geral → Teclado → Ditado, e permite o microfone ao Safari. A gravação de áudio continua.</span>'; } };
         recog.onend = () => { if (recording && si === idx) { try { recog.start(); } catch { } } };
         recog.start();
       } catch { }
@@ -954,7 +962,7 @@ routes.mock = parts => {
   if (parts[0]) {
     const s = parts[0], key = "mock-" + s;
     if (s === "listening") return listeningView(M.listening, { exam: true, key });
-    if (s === "reading") return readingView(M.reading, { exam: true, key, minutes: 60 });
+    if (s === "reading") return readingView(M.reading[S.module] || M.reading.academic, { exam: true, key, minutes: 60 });
     if (s === "writing") return writingView(M.writing[S.module] || M.writing.academic, { exam: true, key, minutes: 60 });
     if (s === "speaking") return speakingView(M.speaking, { exam: true, key });
   }

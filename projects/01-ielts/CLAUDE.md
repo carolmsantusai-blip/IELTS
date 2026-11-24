@@ -8,8 +8,10 @@ Atuar como **examinador/formador IELTS certificado** + **designer de produto de 
 - Dá sempre: banda estimada, 3 pontos fortes, 3 prioridades de melhoria, e reescritas concretas.
 
 ## Contexto da candidata
-- Exame IELTS **na semana de 30 nov 2026** (plano de 7 dias a partir de 24 nov 2026).
-- Módulo assumido: **Academic** (a app também suporta General Training — confirmar com a Carolina).
+- Exame IELTS **General Training a 2 dez 2026** (plano de 7 dias a partir de 24 nov 2026; 1 dez = folga/revisão leve).
+- Módulo: **General Training** (confirmado). A app mantém conteúdo Academic, mas o default é GT.
+- Dispositivo: **iPad/tablet com Safari** → testar compatibilidade Safari/iOS (sem regex lookbehind, 1.º speechSynthesis.speak() dentro do clique, Ditado do iOS para transcrição).
+- Alojamento: GitHub Pages (repo público) — num tablet não há forma prática de abrir a app localmente.
 - Língua de interface: PT-PT; conteúdo de treino: inglês britânico.
 
 ## Formato oficial (referência rápida)

@@ -9,7 +9,7 @@ IELTS.plan = [
     missions: [
       { type: "guide", id: "format", label: "Formato do exame e como é avaliado", min: 15 },
       { type: "listening", id: "l1", min: 12 },
-      { type: "reading", id: "r1", min: 20 },
+      { type: "reading", id: "r1", gt: "g1", min: 20 },
       { type: "writing", id: "w8", min: 40 },
       { type: "speaking", id: "s1", min: 6 },
       { type: "vocab", count: 15, min: 8 }
@@ -18,7 +18,7 @@ IELTS.plan = [
     why: "São as componentes com resposta objetiva: cada ponto ganho aqui é 'retorno garantido'.",
     missions: [
       { type: "guide", id: "strategies", label: "Estratégias por tipo de pergunta", min: 10 },
-      { type: "reading", id: "r2", min: 20 },
+      { type: "reading", id: "r2", gt: "g2", min: 20 },
       { type: "listening", id: "l2", min: 12 },
       { type: "speaking", id: "s6", min: 6 },
       { type: "review", min: 10 },
@@ -38,7 +38,7 @@ IELTS.plan = [
     why: "Task 2 vale o dobro da Task 1 — é a maior alavanca da nota de Writing.",
     missions: [
       { type: "writing", id: "w9", min: 40 },
-      { type: "reading", id: "r3", min: 20 },
+      { type: "reading", id: "r3", gt: "g3", min: 20 },
       { type: "listening", id: "l4", min: 12 },
       { type: "speaking", id: "s7", min: 6 },
       { type: "speaking", id: "s12", min: 6 },
@@ -47,7 +47,8 @@ IELTS.plan = [
   { day: 5, title: "Velocidade & precisão", focus: "Treino cronometrado e correção dos erros recorrentes.",
     why: "Gestão de tempo é gestão de risco: não deixar perguntas em branco.",
     missions: [
-      { type: "writing", id: "w3", min: 20 },
+      { type: "writing", id: "w3", gt: "w12", min: 20 },
+      { type: "reading", id: "r2", gtOnly: true, label: "Secção 3 (texto longo)", min: 20 },
       { type: "writing", id: "w10", min: 40 },
       { type: "speaking", id: "s3", min: 6 },
       { type: "speaking", id: "s8", min: 6 },
@@ -77,8 +78,8 @@ IELTS.plan = [
 
 IELTS.mocks = {
   listening: ["l5", "l6", "l7", "l8"],
-  reading: ["r4", "r5", "r6"],
-  writing: { academic: ["w4", "w11"], general: ["w7", "w11"] },
+  reading: { academic: ["r4", "r5", "r6"], general: ["g4", "g5", "r6"] },
+  writing: { academic: ["w4", "w11"], general: ["w13", "w11"] },
   speaking: ["s4", "s9", "s14"]
 };
 

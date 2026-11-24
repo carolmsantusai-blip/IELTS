@@ -51,6 +51,10 @@ Para gap, `instructions` deve dizer o limite ("Write NO MORE THAN TWO WORDS AND/
 }
 ```
 
+### General Training (`reading-gt.js`)
+Igual ao Reading, mais `module: "general"` e `section: 1|2`. Na Secção 1 cada texto curto é um parágrafo com `heading` opcional (título do anúncio/aviso). Os textos longos Academic servem de treino para a Secção 3 GT.
+Ficheiros `*-gt.js` fazem `IELTS.reading = (IELTS.reading || []).concat([...])`.
+
 ## `listening.js` → `IELTS.listening`
 
 ```js
